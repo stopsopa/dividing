@@ -511,13 +511,13 @@ function renderGrid(step) {
     console.log(`Rendering row ${i}:`, row);
 
     html += '<div class="grid-row">';
-    html += '<div class="grid-cell grid-cell-spacer"></div>';
+    html += '<div class="grid-cell grid-cell-spacer' + (row.type === "line" ? ' line-cell' : '') + '"></div>';
 
     // Minus sign column
     if (row.type === "product") {
       html += '<div class="grid-cell grid-cell-minus">−</div>';
     } else {
-      html += '<div class="grid-cell grid-cell-minus"></div>';
+      html += '<div class="grid-cell grid-cell-minus' + (row.type === "line" ? ' line-cell' : '') + '"></div>';
     }
 
     // Render cells for each column
@@ -526,9 +526,9 @@ function renderGrid(step) {
       for (let col = 0; col < numCols; col++) {
         if (col >= row.startCol && col <= row.endCol) {
           html +=
-            '<div class="grid-cell" style="border-bottom: 2px solid #333;"></div>';
+            '<div class="grid-cell line-cell" style="border-bottom: 2px solid #333;"></div>';
         } else {
-          html += '<div class="grid-cell"></div>';
+          html += '<div class="grid-cell line-cell"></div>';
         }
       }
     } else {
