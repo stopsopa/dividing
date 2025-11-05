@@ -1,1 +1,1 @@
-[demo](https://github.com/stopsopa/dividing)
+[demo](https://stopsopa.github.io/dividing)
