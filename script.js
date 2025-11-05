@@ -99,8 +99,8 @@ function generateSteps(dividend, divisor) {
     let position = 0;
     let quotient = '';
     const workRows = []; // Track all work rows
-    let currentRow = 0;
-    let indentLevel = 0; // Track indentation for each operation
+    let workingStartCol = 0; // Track where the current working number starts
+    let workingEndCol = -1; // Track where the current working number ends
 
     // Initial step - show the problem
     steps.push({
@@ -118,6 +118,7 @@ function generateSteps(dividend, divisor) {
     while (position < dividend.length) {
         const digit = parseInt(dividend[position]);
         workingNumber = workingNumber * 10 + digit;
+        workingEndCol = position; // Update where working number ends
 
         // Preview: Bring down (except first digit when starting fresh)
         if (position > 0 || quotient.length > 0) {
@@ -141,7 +142,7 @@ function generateSteps(dividend, divisor) {
                     divisor,
                     quotient,
                     workRows: [...workRows],
-                    highlight: { type: 'working', value: workingNumber, indent: indentLevel, dividendPos: position }
+                    highlight: { type: 'working', value: workingNumber, dividendPos: position }
                 }
             });
         }
@@ -192,12 +193,19 @@ function generateSteps(dividend, divisor) {
             });
 
             // Execute: Write product
+            // Product should align right with the working number
+            const productStr = product.toString();
+            const productEndCol = workingEndCol;
+            const productStartCol = productEndCol - productStr.length + 1;
+
             workRows.push({
                 type: 'product',
-                value: product.toString(),
-                indent: indentLevel,
-                dividendPos: position
+                value: productStr,
+                startCol: productStartCol,
+                endCol: productEndCol
             });
+            console.log('Added product row:', { value: productStr, startCol: productStartCol, endCol: productEndCol });
+
             steps.push({
                 type: 'execute_multiply',
                 description: `Write ${product} below`,
@@ -225,19 +233,27 @@ function generateSteps(dividend, divisor) {
             });
 
             // Execute: Show subtraction result
+            const differenceStr = difference.toString();
+            const remainderEndCol = productEndCol;
+            const remainderStartCol = remainderEndCol - differenceStr.length + 1;
+
             workRows.push({
                 type: 'line',
-                indent: indentLevel,
-                dividendPos: position
+                startCol: productStartCol,
+                endCol: productEndCol
             });
             workRows.push({
                 type: 'remainder',
-                value: difference.toString(),
-                indent: indentLevel,
-                dividendPos: position
+                value: differenceStr,
+                startCol: remainderStartCol,
+                endCol: remainderEndCol
             });
+            console.log('Added remainder row:', { value: differenceStr, startCol: remainderStartCol, endCol: remainderEndCol });
+
             workingNumber = difference;
-            indentLevel++;
+
+            // Update where the next working number will start
+            workingStartCol = remainderStartCol;
 
             steps.push({
                 type: 'execute_subtract',
@@ -378,13 +394,18 @@ function renderGrid(step) {
 
     const { dividend, divisor, quotient, workRows, highlight } = gridState;
 
-    let html = '<div class="division-grid">';
+    // Define grid: spacer column + minus column + one column per dividend digit
+    const numCols = dividend.length;
+    const gridTemplateColumns = `60px 20px ${'40px '.repeat(numCols).trim()}`;
+
+    let html = `<div class="division-grid" style="grid-template-columns: ${gridTemplateColumns};">`;
 
     // Quotient row
     html += '<div class="grid-row quotient-row">';
-    html += `<div class="grid-cell" style="min-width: ${(divisor.length + 2) * 40}px;"></div>`;
+    html += '<div class="grid-cell grid-cell-spacer"></div>';
+    html += '<div class="grid-cell grid-cell-minus"></div>';
 
-    for (let i = 0; i < dividend.length; i++) {
+    for (let i = 0; i < numCols; i++) {
         const digit = i < quotient.length ? quotient[i] : '';
         const isHighlighted = highlight?.type === 'quotient_digit' && highlight.quotientPos === i;
         html += `<div class="grid-cell ${isHighlighted ? 'highlight-result' : ''}">${digit || '&nbsp;'}</div>`;
@@ -393,65 +414,65 @@ function renderGrid(step) {
 
     // Division bar and dividend row
     html += '<div class="grid-row">';
-    html += `<div class="grid-cell divisor-cell">${divisor} )</div>`;
+    html += `<div class="grid-cell grid-cell-spacer divisor-cell">${divisor} )</div>`;
+    html += '<div class="grid-cell grid-cell-minus"></div>';
 
-    for (let i = 0; i < dividend.length; i++) {
+    for (let i = 0; i < numCols; i++) {
         const digit = dividend[i];
         const isHighlighted = highlight?.type === 'bring_down' && highlight.dividendPos === i;
         html += `<div class="grid-cell ${isHighlighted ? 'highlight-preview' : ''}" style="border-top: 3px solid #333;">${digit}</div>`;
     }
     html += '</div>';
 
-    // Work rows (products, remainders, etc.)
+    // Work rows
+    console.log('Rendering workRows:', workRows);
     for (let i = 0; i < workRows.length; i++) {
         const row = workRows[i];
         const isHighlighted = highlight?.rowIndex === i;
 
-        if (row.type === 'line') {
-            html += '<div class="grid-row">';
-            html += `<div class="grid-cell" style="min-width: ${(divisor.length + 2) * 40}px;"></div>`;
+        console.log(`Rendering row ${i}:`, row);
 
-            // Add spacing for indent
-            for (let j = 0; j < row.indent; j++) {
-                html += '<div class="grid-cell"></div>';
-            }
+        html += '<div class="grid-row">';
+        html += '<div class="grid-cell grid-cell-spacer"></div>';
 
-            // Draw the line across the relevant cells
-            const lineWidth = Math.min(row.value?.length || 2, dividend.length - row.indent);
-            for (let j = 0; j < lineWidth; j++) {
-                html += '<div class="grid-cell" style="border-bottom: 2px solid #333;"></div>';
-            }
-
-            html += '</div>';
+        // Minus sign column
+        if (row.type === 'product') {
+            html += '<div class="grid-cell grid-cell-minus">−</div>';
         } else {
-            html += '<div class="grid-row">';
-            html += `<div class="grid-cell" style="min-width: ${(divisor.length + 2) * 40}px;"></div>`;
-
-            // Add spacing for indent
-            for (let j = 0; j < row.indent; j++) {
-                html += '<div class="grid-cell"></div>';
-            }
-
-            // Add a minus sign for product rows
-            if (row.type === 'product') {
-                html += '<div class="grid-cell" style="min-width: 20px;">-</div>';
-            } else {
-                html += '<div class="grid-cell" style="min-width: 20px;"></div>';
-            }
-
-            // Add the digits
-            const digits = row.value.split('');
-            for (let j = 0; j < digits.length; j++) {
-                const cellHighlight = isHighlighted ? (
-                    highlight.type === 'product_written' ? 'highlight-active' :
-                    highlight.type === 'remainder_shown' ? 'highlight-result' :
-                    ''
-                ) : '';
-                html += `<div class="grid-cell ${cellHighlight}">${digits[j]}</div>`;
-            }
-
-            html += '</div>';
+            html += '<div class="grid-cell grid-cell-minus"></div>';
         }
+
+        // Render cells for each column
+        if (row.type === 'line') {
+            // Line row
+            for (let col = 0; col < numCols; col++) {
+                if (col >= row.startCol && col <= row.endCol) {
+                    html += '<div class="grid-cell" style="border-bottom: 2px solid #333;"></div>';
+                } else {
+                    html += '<div class="grid-cell"></div>';
+                }
+            }
+        } else {
+            // Product or remainder row
+            const digits = row.value.split('');
+            console.log(`  Row ${i} digits:`, digits, `startCol: ${row.startCol}, endCol: ${row.endCol}`);
+            for (let col = 0; col < numCols; col++) {
+                const digitIndex = col - row.startCol;
+                if (digitIndex >= 0 && digitIndex < digits.length) {
+                    const cellHighlight = isHighlighted ? (
+                        highlight.type === 'product_written' ? 'highlight-active' :
+                        highlight.type === 'remainder_shown' ? 'highlight-result' :
+                        ''
+                    ) : '';
+                    console.log(`    Col ${col}: rendering digit '${digits[digitIndex]}'`);
+                    html += `<div class="grid-cell ${cellHighlight}">${digits[digitIndex]}</div>`;
+                } else {
+                    html += '<div class="grid-cell"></div>';
+                }
+            }
+        }
+
+        html += '</div>';
     }
 
     html += '</div>';

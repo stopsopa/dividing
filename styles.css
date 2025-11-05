@@ -204,27 +204,33 @@ header h1 {
 
 /* ===== Division Grid ===== */
 .division-grid {
-    display: inline-block;
+    display: inline-grid;
     font-family: 'Courier New', monospace;
     font-size: 1.5em;
-    line-height: 1.8;
+    line-height: 1;
+    gap: 0;
 }
 
 .grid-row {
-    display: flex;
-    align-items: center;
-    min-height: 50px;
-    position: relative;
+    display: contents;
 }
 
 .grid-cell {
-    min-width: 40px;
+    width: 40px;
     height: 50px;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
     transition: background-color 0.3s, transform 0.2s;
+}
+
+.grid-cell-spacer {
+    width: 60px;
+}
+
+.grid-cell-minus {
+    width: 20px;
 }
 
 /* Cell content */
