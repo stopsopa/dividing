@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Long Division Simulator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Long Division Simulator</h1>
+            <p class="subtitle">Step-by-step visualization of the division process</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Input Section -->
+            <section class="input-section">
+                <div class="input-group">
+                    <label for="dividend">Dividend:</label>
+                    <input type="text" id="dividend" placeholder="e.g., 3400" maxlength="10" pattern="[0-9]*">
+                </div>
+                <div class="input-group">
+                    <label for="divisor">Divisor:</label>
+                    <input type="text" id="divisor" placeholder="e.g., 8" maxlength="10" pattern="[0-9]*">
+                </div>
+                <button id="startBtn" class="btn btn-primary">Start Division</button>
+
+                <div class="examples-group">
+                    <label for="examples">Try an example:</label>
+                    <select id="examples">
+                        <option value="">Select an example...</option>
+                        <option value="84,4">84 ÷ 4 = 21</option>
+                        <option value="85,4">85 ÷ 4 = 21 R1</option>
+                        <option value="3400,8">3400 ÷ 8 = 425</option>
+                        <option value="102,3">102 ÷ 3 = 34</option>
+                        <option value="123456,12">123456 ÷ 12 = 10288</option>
+                        <option value="1000,10">1000 ÷ 10 = 100</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- Grid Display Section -->
+            <section class="grid-section">
+                <div id="gridContainer" class="grid-container">
+                    <p class="placeholder-text">Enter numbers and click "Start Division" to begin</p>
+                </div>
+            </section>
+
+            <!-- Navigation Section -->
+            <section class="navigation-section" id="navigationSection" style="display: none;">
+                <div class="nav-controls">
+                    <button id="backwardBtn" class="btn btn-secondary" disabled>
+                        <span class="btn-icon">←</span> Backward
+                    </button>
+                    <div class="step-indicator">
+                        <span id="stepInfo">Step 0 of 0</span>
+                    </div>
+                    <button id="forwardBtn" class="btn btn-primary">
+                        Forward <span class="btn-icon">→</span>
+                    </button>
+                </div>
+                <div class="action-controls">
+                    <button id="resetBtn" class="btn btn-outline">Reset</button>
+                    <button id="newProblemBtn" class="btn btn-outline">New Problem</button>
+                </div>
+            </section>
+
+            <!-- Info Panel Section -->
+            <section class="info-section" id="infoSection" style="display: none;">
+                <div class="current-step-info">
+                    <h3>Current Step</h3>
+                    <p id="stepDescription" class="step-description">Ready to begin...</p>
+                </div>
+
+                <div class="history-panel">
+                    <div class="history-header" id="historyHeader">
+                        <h3>Step History</h3>
+                        <button id="toggleHistory" class="btn-toggle">▼</button>
+                    </div>
+                    <div id="historyContent" class="history-content" style="display: none;">
+                        <ol id="historyList" class="history-list">
+                            <!-- Steps will be added dynamically -->
+                        </ol>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
