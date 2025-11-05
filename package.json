@@ -8,7 +8,10 @@
     "start": "node server.js",
     "dev": "node server.js"
   },
-  "keywords": ["wysiwyg", "editor"],
+  "keywords": [
+    "wysiwyg",
+    "editor"
+  ],
   "author": "",
   "license": "MIT",
   "dependencies": {
