@@ -46,6 +46,23 @@ elements.divisor.addEventListener('input', (e) => {
     e.target.value = e.target.value.replace(/[^0-9]/g, '');
 });
 
+// Keyboard navigation - Arrow keys
+document.addEventListener('keydown', (e) => {
+    if (!state.isActive) return; // Only work when division is active
+
+    if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        if (!elements.forwardBtn.disabled) {
+            stepForward();
+        }
+    } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        if (!elements.backwardBtn.disabled) {
+            stepBackward();
+        }
+    }
+});
+
 // ===== Main Functions =====
 
 function startDivision() {
@@ -120,6 +137,10 @@ function generateSteps(dividend, divisor) {
         workingNumber = workingNumber * 10 + digit;
         workingEndCol = position; // Update where working number ends
 
+        // Calculate where working number starts based on its length
+        const workingNumStr = workingNumber.toString();
+        workingStartCol = workingEndCol - workingNumStr.length + 1;
+
         // Preview: Bring down (except first digit when starting fresh)
         if (position > 0 || quotient.length > 0) {
             steps.push({
@@ -142,7 +163,12 @@ function generateSteps(dividend, divisor) {
                     divisor,
                     quotient,
                     workRows: [...workRows],
-                    highlight: { type: 'working', value: workingNumber, dividendPos: position }
+                    highlight: {
+                        type: 'working',
+                        value: workingNumber,
+                        workingStartCol: workingStartCol,
+                        workingEndCol: workingEndCol
+                    }
                 }
             });
         }
@@ -419,8 +445,20 @@ function renderGrid(step) {
 
     for (let i = 0; i < numCols; i++) {
         const digit = dividend[i];
-        const isHighlighted = highlight?.type === 'bring_down' && highlight.dividendPos === i;
-        html += `<div class="grid-cell ${isHighlighted ? 'highlight-preview' : ''}" style="border-top: 3px solid #333;">${digit}</div>`;
+        let highlightClass = '';
+
+        // Highlight for bring down (single digit)
+        if (highlight?.type === 'bring_down' && highlight.dividendPos === i) {
+            highlightClass = 'highlight-preview';
+        }
+        // Highlight for working number (range of digits)
+        else if (highlight?.type === 'working' &&
+                 i >= highlight.workingStartCol &&
+                 i <= highlight.workingEndCol) {
+            highlightClass = 'highlight-active';
+        }
+
+        html += `<div class="grid-cell ${highlightClass}" style="border-top: 3px solid #333;">${digit}</div>`;
     }
     html += '</div>';
 
