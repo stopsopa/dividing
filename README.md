@@ -1,9 +1,9 @@
 [demo](https://stopsopa.github.io/dividing)
 
-This is an example of vibe coding — something for which there’s a low chance of finding working examples on the internet for AI to harvest and regurgitate into my task.
+This is an experiment in building something using a “vibe coding” style - something for which an LLM likely had low chance of finding working example on the internet, meaning it can’t just harvest and use it in this project.
 
-In this case, it’s the implementation of long division - something some of us were taught in school.
+In this case, it’s the implementation of long division some of us were taught at school.
 
-And indeed, until the first implementation was produced, there was no way to explain to the AI in a way it would understand what was wrong with it in order to fix those issues.
+And indeed, the initial implementation had some bugs. Unfortunately, there’s no good way to explain to the AI what’s wrong to fix those issues.
 
-Try to take CLAUDE.md yourself and do it from scratch to avoid obvious issues you can observe in the demo.
+Try taking a look at CLAUDE.md yourself - good luck.
